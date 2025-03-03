@@ -1,0 +1,301 @@
+---
+title: "ANA600 Final Exam"
+author: '{Ghayasudin Ghayas}'
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document: default
+---
+## INSTRUCTIONS 
+
+````{r}
+## Load and install required packages
+library(mosaic)
+library(dplyr) 
+library(ggplot2)
+library(ggformula)
+library(supernova)
+library(lsr)
+````
+
+Perform basic exploratory data analysis (EDA) for the final exam. EDA consists of the procedures and concepts we have practiced throughout the course. You will be exploring your dataset, reviewing the variables, modeling an variable of interest, and interpreting results. Each section requires a complete paragraph explaining and interpreting the results within the R-Markdown above the code block required to analyze that section. All writing and code should be written as if presenting a report to your supervisor.
+  
+***
+***
+`````{r}
+getwd()
+myData <- read.csv("ACS.csv")
+head(myData,6)
+myData
+`````
+
+## PREPARATION (10 Points)
+*Import the required file to a new dataframe and load necessary libraries*
+
+```{r include=FALSE}
+mydata <- read.csv("ACS.csv")
+#IMPORT DATA AND PUT INTO DATAFRAME
+myData <- read.csv(file = "ACS.csv", header = TRUE)
+myData
+str(myData)
+summary(myData)
+
+#2. Data Cleaning and Missing Values.
+
+
+# Check for missing values
+missing_values <- sapply(myData, function(x) sum(is.na(x)))
+missing_values
+
+# Optional: Remove or impute missing values
+myData_clean <- myData %>%
+  filter(complete.cases(.))
+```
+
+## INTRODUCTION AND RESEARCH QUESTION (5 Points)
+1. Introduce your purpose and scope, creating a story for the data generation process that might be responsible for the variation in income output variable.
+2. Describe the research question, which is to examine income based on full-time or part-time work hours per week.
+
+The purpose of this analysis is to understand the factors that drive variation in income, focusing specifically on how different working arrangements, such as full-time versus part-time weekly work hours, impact earnings. In this dataset, various demographic and work-related factors contribute to income disparities, such as age, marital status, and race. We aim to explore whether working full-time significantly boosts income compared to part-time, considering that weekly hours are a primary determinant of income in many professions. This question is essential for understanding how employment patterns shape financial outcomes and for identifying any notable income differences driven by weekly work commitment..
+***
+
+## QUESTION #1 (10 Points)
+1. Enter code to produce the structure of your dataframe
+2. Recode the Sex variable to 0=Female, 1=Male
+3. Produce a crosstab table of observations for the race and sex variables 
+4. View the top five records in the dataframe
+5. Write one paragraph describing the structure of the data frame and interpreting the produced table
+
+{The DataFrame consists of eight variables, capturing demographic and economic attributes of individuals, including Sex, Age, Married, Income, HoursWk, Race, USCitizen, HealthInsurance, and Language. The Sex variable was recoded to categorize individuals as either "Female" or "Male," enhancing interpretability. The crosstabulation table reveals the distribution of individuals by race and sex, showing how many males and females belong to each racial category. This table allows us to observe potential demographic trends, such as the prevalence of specific races within each gender category, which could inform further analysis regarding socio-economic factors or health outcomes related to race and gender}
+
+
+```{r include=FALSE}
+#1. Produce the Structure of Your DataFrame
+str(myData)
+#2. Recode the Sex Variable
+myData$Sex <- ifelse(myData$Sex == 0, "Female", "Male")
+print(myData$Sex)
+
+#3. Produce a Crosstab Table of Observations for Race and Sex Variables
+crosstab <- table(myData$Race, myData$Sex)
+print(crosstab)
+
+#4. View the Top Five Records in the DataFrame
+head(myData, 5)
+```
+
+## QUESTION #2 (10 Points)
+1. Recode the income variable to value x 1,000
+2. Calculate the minimum, maximum, mean, median, IQR, and range for income
+3. Calculate the mean of income each for males and for females
+4. Write one paragraph explaining and interpreting the descriptive statistics
+
+{The descriptive statistics for the recoded Income variable reveal significant insights into the financial distribution of individuals in the dataset. The minimum income was found to be 0, while the maximum soared to Maximum: 5.63e+08 , indicating a wide range of economic disparities. The mean income, calculated at Mean: 22785129 , alongside a median of 1.3e+07, suggests that income is skewed due to a few high earners, as evidenced by the interquartile range (IQR) of 31841087, and the overall range of 0 5.63e+08. When analyzing income by sex, males exhibited a mean income of 22785129,  while females had a mean income of 0. This disparity indicates a potential gender pay gap within the dataset, warranting further investigation into contributing factors.}
+
+```{r Question_02}
+#1. Recode the income variable to value x 1,000
+myData$Income <- myData$Income * 1000
+
+#2. Calculate the Minimum, Maximum, Mean, Median, IQR, and Range for Income
+
+# Descriptive statistics for Income
+income_summary <- summary(myData$Income)
+income_IQR <- IQR(myData$Income)
+income_range <- range(myData$Income)
+
+# Output the results
+cat("Minimum:", income_summary['Min.'], "\n")
+cat("Maximum:", income_summary['Max.'], "\n")
+cat("Mean:", income_summary['Mean'], "\n")
+cat("Median:", income_summary['Median'], "\n")
+cat("IQR:", income_IQR, "\n")
+cat("Range:", income_range, "\n")
+
+#3. Calculate the Mean of Income for Males and Females
+mean_income <- aggregate(Income ~ Sex, data = myData, FUN = mean)
+print(mean_income)
+
+
+```
+
+## QUESTION 3 (10 Points)
+1. Create a new variable SexL such that Sex = 0 is "Female", Sex = 1 is "Male", and else is "Undefined" 
+2. Create an appropriate visualization for income and the new SexL variable
+3. Write one paragraph explaining and interpreting the visualization
+
+{Your writeup here}
+
+```{r Question_03, echo=FALSE}
+#1. Create a new variable SexL such that Sex = 0 is "Female", Sex = 1 is "Male", and else is "Undefined"
+myData$SexL <- ifelse(myData$Sex == 0, "Female", 
+                       ifelse(myData$Sex == 1, "Male", "Undefined"))
+myData$SexL
+#2. Create an appropriate visualization for income and the new SexL variable
+library(ggplot2) # Load ggplot2 package
+# Create a box plot for Income by SexL
+ggplot(myData, aes(x = SexL, y = Income, fill = SexL)) +
+  geom_boxplot(outlier.colour = "red", outlier.shape = 16, outlier.size = 2) +
+  labs(title = "Income Distribution by Sex",
+       x = "Sex",
+       y = "Income (in thousands)") +
+  theme_minimal() +
+  scale_fill_manual(values = c("Female" = "lightblue", "Male" = "lightgreen", "Undefined" = "lightgray"))
+
+```
+
+## QUESTION 4 (10 Points)
+1. Create a histogram of income by sex with facet grid
+2. Write one paragraph explaining and interpreting the visualization
+{The histogram and boxplot illustrate the distribution of income by sex in the dataset, highlighting the frequency and spread of income values for males and females. The x-axis represents income levels, while the y-axis shows frequency or variability, with the boxplot revealing central tendencies and outliers. Significant disparities in income between genders may be evident through distinct peaks in the histogram or variations in the boxplot's median and interquartile ranges. This visualization serves as a valuable tool for identifying gender-based income disparities and prompts further investigation into the factors contributing to these differences.}
+
+```{r Question04, echo=FALSE}
+
+str(myData)
+summary(myData$Income)
+summary(subset(myData, Income > 0)$Income)
+
+income_data$LogIncome <- log10(income_data$Income)  # Log-transform income
+
+ggplot(income_data, aes(x = LogIncome)) +
+  geom_histogram(binwidth = 0.5, fill = "skyblue", color = "black") +
+  facet_wrap(~ SexL) +
+  labs(title = "Log-Transformed Income Distribution by Sex", x = "Log Income", y = "Frequency")
+
+ggplot(income_data, aes(x = SexL, y = Income)) +
+  geom_boxplot(fill = "skyblue") +
+  labs(title = "Income Distribution by Sex", x = "Sex", y = "Income")
+```
+## QUESTION 5 (10 Points)
+1. Create a model of income for females
+2. Write one paragraph explaining and interpreting the model
+
+{Based on the outputs, it looks like there are no entries in dataset (myData) for females, which is why filtering for females returns an empty data frame (femalesData). The unique values in the Sex column show only "Male," confirming that there are no "Female" entries to analyze.}
+
+```{r Question05, echo=FALSE}
+# Check the structure of myData
+str(myData)
+
+# Filter the dataset to include only females (GenderBinary = 0)
+femalesData <- myData[myData$GenderBinary == 0, ]
+
+print("femalesData") # no out put form pirnt its mean there is no row in the femalData where GenderBinary is = 0 , to further check it we 
+unique(myData$GenderBinary) # since the out put return is 1, its mean no rows in myData have GenderBinary set to 0, which could be due to inconsistencies in how the values were assigned.
+myData$GenderBinary <- ifelse(myData$Sex == "female", 0, 1)
+myData$GenderBinary 
+# Ensure there are female observations in the filtered dataset
+if (nrow(femalesData) > 0) {
+  # Create the income model for females
+  incomeModelFemales <- lm(Income ~ Age + Married + HoursWk + Race + Language, data = femalesData)
+  
+  # Summarize the model
+  summary(incomeModelFemales)
+} else {
+  print("No female data available in the dataset.")
+}
+
+```
+
+## QUESTION 6 (20 Points)
+1. Create a model of income by sex
+2. Write one paragraph explaining and interpreting the model
+
+{since there are no female entries in dataset, we can only analyze income based on the existing male data. the insight related to gender income looks disparities, We may need to obtain a dataset that includes both sexes to make meaningful comparisons.
+The income model includes various predictors, such as GenderBinary, Age, Married, HoursWk, Race, and Language, but with GenderBinary not contributing to the model due to singularities (likely because there are no observations with GenderBinary = 0). Significant predictors include Age, Married, and HoursWk, with Age showing a negative effect on income, Married showing a positive effect, and HoursWk being highly significant in explaining income variations. The overall model explains about 19.7% of the variability in income (adjusted R-squared of 0.1914), suggesting that other factors not included may also impact income.}
+
+```{r Question06, echo=FALSE}
+
+# Convert Sex to binary, with "Male" as 1 and "Female" as 0
+myData$GenderBinary <- ifelse(myData$Sex == "male", 1, 0)
+
+# Check the unique values in the new GenderBinary column
+unique(myData$GenderBinary)
+
+# Create the income model including GenderBinary
+incomeModelByGender <- lm(Income ~ GenderBinary + Age + Married + HoursWk + Race + Language, data = myData)
+
+# Summarize the model
+summary(incomeModelByGender)
+
+```
+
+## QUESTION 7 (20 Points)
+1. Calculate the predicted value and residual value for each observation using the income by sex model
+2. Calculate the sum of squared deviations and sum of absolute deviations
+3. Write one paragraph explaining and interpreting the results
+
+{The results show a substantial sum of squared deviations at approximately 
+1.23×10^18, indicating large variances between the actual and predicted income values. This high value suggests that the model may not be fully capturing the underlying patterns of income variations within the data. The sum of absolute deviations, approximately 18.57 billion, provides another perspective on prediction accuracy by summing the absolute residuals without disproportionately emphasizing large errors. Together, these values suggest that while the model incorporates significant predictors (like age and working hours), it may benefit from additional variables or refinement to improve its fit for income predictions across the dataset.}
+
+```{r Question_07}
+# 1. Calculate predicted values and residuals
+myData$PredictedIncome <- predict(incomeModelByGender)
+myData$Residuals <- myData$Income - myData$PredictedIncome
+
+# 2. Calculate sum of squared deviations and sum of absolute deviations
+sum_squared_deviations <- sum(myData$Residuals^2)
+sum_absolute_deviations <- sum(abs(myData$Residuals))
+
+# Display results
+sum_squared_deviations
+sum_absolute_deviations
+
+```
+
+## QUESTION 8 (20 Points)
+1. Run an analysis of variance on the model of income by sex
+2. Write one paragraph explaining and interpreting the results
+Hint:
+* H0: bi = 0
+* Ha: bi <> 0
+
+{The ANOVA results for the income model by sex reveal that several variables significantly contribute to explaining income variability. Specifically, age (p = 0.00992), marital status (p < 0.000001), and hours worked per week (p < 2.2e-16) all have p-values well below 0.05, indicating that these predictors have statistically significant effects on income. The hours worked per week has the largest impact, as evidenced by its high F value (208.62), suggesting a strong relationship with income. In contrast, race (p = 0.276) and language (p = 0.996) do not show statistically significant effects, indicating they contribute less to explaining income variability in this model. Overall, the model demonstrates that demographic and work-related factors like age, marital status, and work hours play substantial roles in income determination.}
+
+```{r Question_08}
+# Run ANOVA on the income model by sex
+anova_result <- anova(incomeModelByGender)
+print(anova_result)
+
+```
+
+## QUESTION 9 (10 Points)
+1. Calculate the proportional reduction in error
+2. Write one paragraph explaining and interpreting the improvement of the linear model by adding sex
+Hint:
+* H0: bi = 0
+* Ha: bi <> 0
+
+{A result of 0 for the Proportional Reduction in Error (PRE) suggests that adding the GenderBinary variable (indicating sex) did not improve the model's predictive power for income. In other words, the error (measured by the residual sum of squares) remained unchanged when sex was included as a predictor}
+
+```{r Question_09}
+# Model 1: Without Sex (GenderBinary)
+model_without_gender <- lm(Income ~ Age + Married + HoursWk + Race + Language, data = myData)
+
+# Model 2: With Sex (GenderBinary)
+model_with_gender <- lm(Income ~ GenderBinary + Age + Married + HoursWk + Race + Language, data = myData)
+
+# Calculate RSS for each model
+rss_without_gender <- sum(residuals(model_without_gender)^2)
+rss_with_gender <- sum(residuals(model_with_gender)^2)
+
+# Calculate Proportional Reduction in Error (PRE)
+PRE <- (rss_without_gender - rss_with_gender) / rss_without_gender
+
+# Output the PRE value
+print(PRE)
+
+
+
+```
+
+## QUESTION 10 (20 Points)
+Write one paragraph interpreting and concluding the results of your analysis.
+
+{The analysis of income determinants revealed key factors impacting income, though some variables proved to be less influential than anticipated. Age, marital status, and weekly work hours were statistically significant predictors, each showing a notable relationship with income. Weekly work hours had the largest effect, underscoring its importance in income determination. However, when adding gender (converted into a binary variable), the model showed no proportional reduction in error, indicating that gender did not provide additional explanatory power. This suggests that other predictors like age and work hours better capture variations in income within the dataset. Race and language, although included in the model, were not statistically significant in explaining income, pointing toward minimal effects in this context. Overall, this analysis highlights the primary role of work hours, age, and marital status on income, with gender adding little predictive value, which may indicate a more balanced income distribution across genders within this specific dataset}
+
+**END OF FINAL EXAM**
+
+rmarkdown::render("FinalExam_Student.Rmd", output_format = "html_document")
+```{r, error=TRUE}
+# Code that might cause an error
+mydata <- read.csv("ACS.csv")
+knitr::opts_chunk$set(error = TRUE)
