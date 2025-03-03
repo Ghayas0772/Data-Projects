@@ -6,13 +6,13 @@ Welcome to my Data Analysis Projects repository! This collection showcases my sk
 
 This repository is organized into distinct folders, each dedicated to projects using specific tools:
 
-1- Excel-Projects: Demonstrates proficiency in data manipulation, analysis, and visualization using Microsoft Excel.
-2- Power BI - Projects: Contains interactive dashboards and reports created with Power BI, highlighting my ability to transform data into actionable insights.
-3- Python - Projects: Features projects using Python for data cleaning, analysis, machine learning, and automation.
-4- SQL- Projects: Showcases my ability to query and manage databases using SQL, extracting and transforming data for analysis.
-5- R - Projects: Projects using R for statistical analysis and data visualization.
-6- SAS - Projects: Contains projects developed using SAS for data analysis and reporting.
-7- Tableau - Projects: Interactive visualizations and dashboards developed using Tableau.
+* **Excel-Projects:** Demonstrates proficiency in data manipulation, analysis, and visualization using Microsoft Excel.
+* **Power BI - Projects:** Contains interactive dashboards and reports created with Power BI, highlighting my ability to transform data into actionable insights.
+* **Python - Projects:** Features projects using Python for data cleaning, analysis, machine learning, and automation.
+* **SQL- Projects:** Showcases my ability to query and manage databases using SQL, extracting and transforming data for analysis.
+* **R - Projects:** Projects using R for statistical analysis and data visualization.
+* **SAS - Projects:** Contains projects developed using SAS for data analysis and reporting.
+* **Tableau - Projects:** Interactive visualizations and dashboards developed using Tableau.
 
 ## What You'll Find
 
@@ -45,3 +45,4 @@ www.linkedin.com/in/ghayasudin-ghayas/
 https://www.upwork.com/freelancers/~019a3043b198a4e3d6
 
 Thank you for visiting!
+Ghayasudin Ghayas 
